@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_300/pages/signup_page.dart';
 import 'login_page.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -26,18 +27,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
               });
             },
             children: const [
-              IntroScreen(
-                title: '환영합니다!',
-                description: '청년부 앱에 오신 것을 환영합니다.',
+              WelcomePage(),
+              FeaturePage(
+                title: 'FEATURE DESCRIPTION 1!',
+                description: 'amazing~!! \nWoW~~ \nRulu Rala~~!!!',
               ),
-              IntroScreen(
-                title: '출석 기능',
-                description: '간편하게 출석을 체크할 수 있습니다.',
+              FeaturePage(
+                title: 'FEATURE DESCRIPTION 2!!',
+                description: 'very nice! \ngamazagadoei~~ \nHi potatoes~',
               ),
-              IntroScreen(
-                title: '기도 제목',
-                description: '조별로 기도 제목을 나눌 수 있습니다.',
-              ),
+              StartPage(),
             ],
           ),
 
@@ -46,8 +45,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
             left: 40,
             right: 40,
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 191, 190, 190),
+                foregroundColor: const Color.fromARGB(255, 40, 39, 39),
+                minimumSize: const Size(0, 47),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16))
+                ),
               onPressed: () {
-                if (currentPage < 2) {
+                if (currentPage < 3) {
                   _controller.nextPage(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
@@ -56,13 +62,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const LoginPage(),
+                      builder: (_) => const SignupPage(),
                     ),
                   );
                 }
               },
               child: Text(
-                currentPage == 2 ? '시작하기' : '다음',
+                currentPage == 3 ? '회원가입' : '다음',
               ),
             ),
           ),
@@ -72,11 +78,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 }
 
-class IntroScreen extends StatelessWidget {
+class FeaturePage extends StatelessWidget {
   final String title;
   final String description;
 
-  const IntroScreen({
+  const FeaturePage({
     super.key,
     required this.title,
     required this.description,
@@ -85,7 +91,7 @@ class IntroScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFD9D9D9),
+      color: const Color.fromARGB(255, 227, 227, 227),
       padding: const EdgeInsets.all(32),
 
       child: Column(
@@ -116,3 +122,44 @@ class IntroScreen extends StatelessWidget {
     );
   }
 }
+
+class WelcomePage extends StatelessWidget {
+  const WelcomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color.fromARGB(255, 227, 227, 227),
+      child: const Center(
+        child: Text(
+          '환영합니다!',
+          style: TextStyle(
+            fontSize: 40,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class StartPage extends StatelessWidget {
+  const StartPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Color.fromARGB(255, 227, 227, 227),
+      child: const Center(
+        child: Text(
+          '시작해볼텨~?!',
+          style: TextStyle(
+            fontSize: 40,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+}
+

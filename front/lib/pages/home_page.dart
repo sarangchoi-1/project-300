@@ -8,7 +8,7 @@ class HomePage extends StatelessWidget {
     return const Scaffold(
       body: Center(
         child: Text(
-          '메인 화면',
+          '홈화면~ 아이 원 투 고 홈~',
           style: TextStyle(fontSize: 30),
         ),
       ),
