@@ -7,7 +7,8 @@ need; section 8 is what we have to decide together today.
 Reference docs, for afterwards:
 [schema and rules](./BACKEND1_HANDOFF.md) ·
 [Flutter calls](./FLUTTER_AUTH_INTEGRATION.md) ·
-[Backend 2 contract](./BACKEND2_RLS_CONTRACT.md)
+[Backend 2 contract](./BACKEND2_RLS_CONTRACT.md) ·
+[한국어 버전](./TEAM_WALKTHROUGH.ko.md)
 
 ---
 
