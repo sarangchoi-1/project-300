@@ -1,0 +1,51 @@
+#  Supabase local development config.
+#
+#  Only settings that matter to the Backend 1 auth foundation are set here;
+#  everything else falls back to the CLI defaults. Secrets never belong in this
+#  file - see .env.example at the repository root.
+
+project_id = "project-300"
+
+[api]
+enabled = true
+port = 54321
+# Only the public schema is exposed over PostgREST. Backend 2 should keep using
+# public rather than introducing a new exposed schema, otherwise the
+# authorization helpers have to be re-granted.
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+# Match the Postgres major version of the hosted project before running
+# `supabase db push`.
+major_version = 17
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+# Deep link the Flutter app registers for password-recovery / magic links.
+site_url = "io.supabase.project300://login-callback"
+additional_redirect_urls = ["io.supabase.project300://login-callback"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+# Public signup is required: people sign up, then an admin approves them.
+enable_signup = true
+# Anonymous sign-in would create auth users with no real identity, which breaks
+# the approval model. Keep it off.
+enable_anonymous_sign_ins = false
+
+[auth.email]
+enable_signup = true
+# Email confirmation is OFF locally so the team can test quickly. Whether to turn
+# it on in production is an open decision - the admin approval gate already stops
+# unapproved users from seeing content. See back/docs/BACKEND1_HANDOFF.md.
+enable_confirmations = false
+double_confirm_changes = true
+secure_password_change = true

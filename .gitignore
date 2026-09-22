@@ -1,0 +1,20 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Supabase CLI local state
+back/supabase/.branches/
+back/supabase/.temp/
+
+# Flutter / Dart
+.dart_tool/
+.packages
+build/
+*.iml
+
+# Node
+node_modules/
+
+# macOS
+.DS_Store
