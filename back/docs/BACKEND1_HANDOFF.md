@@ -9,8 +9,52 @@ the tables, and PostgreSQL Row Level Security is the only authorization layer.
 
 Companion documents:
 
+- [`TEAM_WALKTHROUGH.md`](./TEAM_WALKTHROUGH.md) — plain-language tour ([한국어](./TEAM_WALKTHROUGH.ko.md))
 - [`FLUTTER_AUTH_INTEGRATION.md`](./FLUTTER_AUTH_INTEGRATION.md) — exact client calls
 - [`BACKEND2_RLS_CONTRACT.md`](./BACKEND2_RLS_CONTRACT.md) — how to write feature RLS
+
+---
+
+## 0. Cloud project
+
+All six migrations are applied to the shared cloud project.
+
+| | |
+|---|---|
+| Project | `mrcc_app` (org `project-300`) |
+| Ref | `isccawxfknyrhvzandis` |
+| URL | `https://isccawxfknyrhvzandis.supabase.co` |
+| Region | `ap-northeast-2` (Seoul) |
+| Postgres | 17.6 |
+| Dashboard | [studio](https://supabase.com/dashboard/project/isccawxfknyrhvzandis) · [SQL editor](https://supabase.com/dashboard/project/isccawxfknyrhvzandis/sql/new) |
+
+Get the anon key for the Flutter app from the CLI rather than from this file, so
+no key is committed:
+
+```bash
+supabase projects api-keys --project-ref isccawxfknyrhvzandis
+```
+
+Applying future migrations to the cloud, from `back/`:
+
+```bash
+supabase db push --linked --dry-run   # always check first
+supabase db push --linked
+```
+
+> **Never run `supabase db reset` while linked.** Locally it rebuilds from the
+> migrations and is safe. Against the linked cloud project it destroys real data.
+> Cloud changes only ever go through `db push`.
+
+Note that this project already had an event trigger named `public.rls_auto_enable`
+before our migrations landed. It turns on RLS automatically for any newly created
+table. Treat it as a safety net, not as permission to skip writing
+`enable row level security` yourself — it does not write policies, and a table with
+RLS on and no policies denies everyone.
+
+`supabase config push` has deliberately **not** been run, so the cloud auth
+settings are still at their dashboard defaults rather than our local ones. See the
+open decisions in section 8 before changing that.
 
 ---
 
