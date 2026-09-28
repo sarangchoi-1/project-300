@@ -696,3 +696,166 @@ order by tablename, cmd, policyname;
 
 \echo ''
 \echo 'ALL BACKEND 1 AUTHORIZATION TESTS PASSED'
+
+--------------------------------------------------------------------------------
+\echo ''
+\echo '### 10. bulletins RLS'
+--------------------------------------------------------------------------------
+
+-- Test fixture: one published bulletin and one draft bulletin.
+begin;
+
+insert into public.bulletins
+  (title, bulletin_date, notion_url, is_published)
+values
+  ('Published Bulletin', '2026-09-20', 'https://notion.so/published-test', true),
+  ('Draft Bulletin',     '2026-09-27', 'https://notion.so/draft-test', false);
+
+commit;
+
+
+-- ---------------------------------------------------------------------------
+-- Pending user: cannot see any bulletins
+-- ---------------------------------------------------------------------------
+
+begin;
+
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"00000000-0000-0000-0000-0000000000d1"}',
+  true
+) \g /dev/null
+
+set local role authenticated;
+
+do $$
+begin
+  perform tests.assert_visible(
+    $q$select * from public.bulletins$q$,
+    0,
+    'a pending user cannot read bulletins'
+  );
+end
+$$;
+
+rollback;
+
+
+-- ---------------------------------------------------------------------------
+-- Approved member: published only, read-only
+-- ---------------------------------------------------------------------------
+
+begin;
+
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"00000000-0000-0000-0000-0000000000c1"}',
+  true
+) \g /dev/null
+
+set local role authenticated;
+
+do $$
+begin
+  perform tests.assert_visible(
+    $q$select * from public.bulletins$q$,
+    1,
+    'an approved member sees only published bulletins'
+  );
+
+  perform tests.assert(
+    (select title from public.bulletins) = 'Published Bulletin',
+    'the bulletin visible to a member is the published one'
+  );
+
+  perform tests.assert_denied(
+    $q$
+      insert into public.bulletins
+        (title, bulletin_date, notion_url, is_published)
+      values
+        ('Member Bulletin', '2026-10-04', 'https://notion.so/member-test', true)
+    $q$,
+    'a member cannot create a bulletin'
+  );
+
+  perform tests.assert_affects(
+    $q$
+      update public.bulletins
+         set title = 'Hacked'
+       where bulletin_date = '2026-09-20'
+    $q$,
+    0,
+    'a member cannot update a bulletin'
+  );
+
+  perform tests.assert_affects(
+    $q$
+      delete from public.bulletins
+       where bulletin_date = '2026-09-20'
+    $q$,
+    0,
+    'a member cannot delete a bulletin'
+  );
+end
+$$;
+
+rollback;
+
+
+-- ---------------------------------------------------------------------------
+-- Admin: full CRUD
+-- ---------------------------------------------------------------------------
+
+begin;
+
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"00000000-0000-0000-0000-0000000000a1"}',
+  true
+) \g /dev/null
+
+set local role authenticated;
+
+do $$
+begin
+  perform tests.assert_visible(
+    $q$select * from public.bulletins$q$,
+    2,
+    'an admin sees published and unpublished bulletins'
+  );
+
+  perform tests.assert_affects(
+    $q$
+      insert into public.bulletins
+        (title, bulletin_date, notion_url, is_published)
+      values
+        ('Admin Bulletin', '2026-10-04', 'https://notion.so/admin-test', false)
+    $q$,
+    1,
+    'an admin can create a bulletin'
+  );
+
+  perform tests.assert_affects(
+    $q$
+      update public.bulletins
+         set title = 'Edited Draft Bulletin'
+       where bulletin_date = '2026-09-27'
+    $q$,
+    1,
+    'an admin can update a bulletin'
+  );
+
+  perform tests.assert_affects(
+    $q$
+      delete from public.bulletins
+       where bulletin_date = '2026-10-04'
+    $q$,
+    1,
+    'an admin can delete a bulletin'
+  );
+end
+$$;
+
+rollback;
+
+\echo '    ok'
