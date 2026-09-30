@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'home_page.dart';
 
@@ -188,7 +189,7 @@ class _SignupPageState extends State<SignupPage> {
                         height: 48,
                         decoration: BoxDecoration(
                           color: const Color.fromARGB(255, 217, 216, 216),
-                          borderRadius: BorderRadius.circular(16)
+                          borderRadius: BorderRadius.circular(16),
                         ),
 
                         child: Center(child: Text(selectedYear ?? '년도')),
@@ -248,7 +249,7 @@ class _SignupPageState extends State<SignupPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 219, 217, 217),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (!isPasswordMatch) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -259,11 +260,25 @@ class _SignupPageState extends State<SignupPage> {
                       return;
                     }
 
-                    Navigator.pushReplacement(
-                      context,
+                    try {
+                      final response = await Supabase.instance.client.auth
+                          .signUp(
+                            email: idController.text.trim(),
+                            password: passwordController.text,
+                          );
 
-                      MaterialPageRoute(builder: (context) => const HomePage()),
-                    );
+                      print('회원가입 성공');
+                      print(response.user);
+
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('회원가입 성공')),
+                        );
+                      }
+                    } catch (e) {
+                      print('에러');
+                      print(e);
+                    }
                   },
 
                   child: const Text('회원가입'),
